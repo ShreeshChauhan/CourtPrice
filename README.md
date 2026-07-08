@@ -188,24 +188,6 @@ pm2 startup
 - **Tennis match data:** [JeffSackmann/tennis_atp](https://github.com/JeffSackmann/tennis_atp) — free, no API key required, updated regularly
 - **Merchandise prices:** [eBay Browse API](https://developer.ebay.com/api-docs/buy/browse/overview.html) — free developer tier, OAuth2 app credentials
 
----
-
-## What I Learned Building This
-
-- Designing and building a REST API with Node.js + Express
-- Integrating multiple third-party APIs (eBay OAuth2, public datasets)
-- Cloud architecture with AWS — S3 for object storage, DynamoDB for NoSQL, EC2 for compute
-- React component design and custom hooks for data fetching
-- Full-stack deployment: backend on EC2, frontend on Vercel
-- Caching strategies to reduce redundant network calls
-
----
-
-## Resume Description
-
-> **CourtPrice** | React · Node.js · Express · AWS (EC2, S3, DynamoDB) · eBay API
->
-> Full-stack web app correlating ATP tennis performance with memorabilia market prices. Built REST API in Express with S3-based CSV caching and DynamoDB time-series price storage. Deployed React frontend on Vercel and Node.js backend on AWS EC2.
 
 ---
 
