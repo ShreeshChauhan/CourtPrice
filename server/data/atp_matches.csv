@@ -1,0 +1,11 @@
+winner_name,loser_name,tourney_name,surface,round,score,tourney_date,winner_ioc,loser_ioc,winner_id,loser_id,winner_hand,winner_rank,loser_rank
+Carlos Alcaraz,Novak Djokovic,Wimbledon,Grass,F,6-2 6-2,20240101,ESP,SRB,1,2,R,1,2
+Carlos Alcaraz,Daniil Medvedev,US Open,Hard,SF,7-6 6-4,20240101,ESP,RUS,1,3,R,1,3
+Jannik Sinner,Daniil Medvedev,Australian Open,Hard,F,3-6 3-6 6-4 6-4 6-3,20240101,ITA,RUS,4,3,R,2,3
+Jannik Sinner,Carlos Alcaraz,Wimbledon,Grass,SF,2-6 6-7 6-7,20240101,ITA,ESP,4,1,R,2,1
+Novak Djokovic,Carlos Alcaraz,Roland Garros,Clay,QF,6-4 6-4,20240101,SRB,ESP,2,1,R,2,1
+Daniil Medvedev,Jannik Sinner,US Open,Hard,F,6-3 6-3,20240101,RUS,ITA,3,4,R,3,2
+Carlos Alcaraz,Holger Rune,Madrid Open,Clay,F,6-3 6-3,20240101,ESP,DEN,1,5,R,1,5
+Holger Rune,Jannik Sinner,Paris Masters,Hard,QF,7-6 6-4,20240101,DEN,ITA,5,4,R,5,2
+Andrey Rublev,Daniil Medvedev,Dubai,Hard,F,6-4 6-3,20240101,RUS,RUS,6,3,R,6,3
+Carlos Alcaraz,Andrey Rublev,Barcelona,Clay,F,6-2 6-2,20240101,ESP,RUS,1,6,R,1,6
