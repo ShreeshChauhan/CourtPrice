@@ -1,41 +1,123 @@
-import { useState } from 'react';
+import { useState, useEffect } from "react"
 
-export default function App (){
-  const [search, setSearch] = useState("");
+export default function App() {
+  const [query, setQuery] = useState("")
+  const [players, setPlayers] = useState([])
+  const [selectedPlayer, setSelectedPlayer] = useState(null)
+
+  useEffect(() => {
+    if (query.length < 3) {
+      setPlayers([])
+      return
+    }
+
+    fetch(`http://localhost:3001/api/tennis/players?name=${query}`)
+      .then((res) => res.json())
+      .then((data) => setPlayers(data))
+      .catch((err) => console.error(err))
+  }, [query])
+
+  if (selectedPlayer) {
+    return (
+      <div style={{
+        minHeight: "100vh",
+        padding: "2rem",
+        color: "white"
+      }}>
+        <button
+          onClick={() => setSelectedPlayer(null)}
+          style={{
+            background: "none",
+            border: "1px solid #444",
+            color: "white",
+            padding: "0.5rem 1rem",
+            borderRadius: "6px",
+            cursor: "pointer",
+            marginBottom: "2rem"
+          }}
+        >
+          ← Back
+        </button>
+
+        <h1 style={{ fontSize: "2.5rem", fontWeight: "800" }}>
+          {selectedPlayer.player_name}
+        </h1>
+        <p style={{ opacity: 0.5, marginTop: "0.5rem" }}>
+          {selectedPlayer.player_country}
+        </p>
+
+        <p style={{ marginTop: "2rem", opacity: 0.4 }}>
+          Match history and prices coming next...
+        </p>
+      </div>
+    )
+  }
 
   return (
-    <div style={{ 
-      minHeight: "100vh", 
+    <div style={{
+      minHeight: "100vh",
       display: "flex",
       flexDirection: "column",
+      alignItems: "center",
       justifyContent: "center",
-      alignItems: "center" 
+      gap: "1rem"
     }}>
 
-    <h1 style={{
-      fontSize: "4rem", 
-      fontWeight: "800", 
-      letterSpacing: "0.05em",
-      color: "#635959ec"
-    }}>
-      CourtPrice
-    </h1>
+      <h1 style={{ fontSize: "3rem", fontWeight: "800", color: "white" }}>
+        CourtPrice
+      </h1>
 
-    <input
+      <input
         type="text"
-        placeholder="Search the player"
+        placeholder="Search a player..."
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
         style={{
-          backgroundColor: "#1c1717a5",
-          color: "white",
-          fontSize: "1.2rem",
-          padding: "10px 15px",
           width: "400px",
-          border: "1px solid #555",
-          borderRadius: "6px",
+          padding: "0.75rem 1rem",
+          fontSize: "1rem",
+          borderRadius: "8px",
+          border: "1px solid #444",
+          background: "transparent",
+          color: "white",
           outline: "none"
         }}
       />
 
+      {players.length > 0 && (
+        <ul style={{
+          listStyle: "none",
+          width: "400px",
+          background: "#1a1f35",
+          border: "1px solid #444",
+          borderRadius: "8px",
+          padding: "0.5rem 0"
+        }}>
+          {players.map((player) => (
+            <li
+              key={player.player_key}
+              onClick={() => {
+                setSelectedPlayer(player)
+                setQuery("")
+                setPlayers([])
+              }}
+              style={{
+                padding: "0.75rem 1rem",
+                cursor: "pointer",
+                color: "white",
+                display: "flex",
+                justifyContent: "space-between"
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = "#2a3050"}
+              onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+            >
+              <span>{player.player_name}</span>
+              <span style={{ opacity: 0.5 }}>{player.player_country}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
     </div>
-  );
+  )
 }
