@@ -4,28 +4,35 @@ export default function App() {
   const [query, setQuery] = useState("")
   const [players, setPlayers] = useState([])
   const [selectedPlayer, setSelectedPlayer] = useState(null)
+  const [matches, setMatches] = useState([])
 
   useEffect(() => {
     if (query.length < 3) {
       setPlayers([])
       return
     }
-
     fetch(`http://localhost:3001/api/tennis/players?name=${query}`)
       .then((res) => res.json())
       .then((data) => setPlayers(data))
       .catch((err) => console.error(err))
   }, [query])
 
+  useEffect(() => {
+    if (!selectedPlayer) return
+    fetch(`http://localhost:3001/api/tennis/matches?playerName=${selectedPlayer.player_name}`)
+      .then((res) => res.json())
+      .then((data) => setMatches(data))
+      .catch((err) => console.error(err))
+  }, [selectedPlayer])
+
   if (selectedPlayer) {
     return (
-      <div style={{
-        minHeight: "100vh",
-        padding: "2rem",
-        color: "white"
-      }}>
+      <div style={{ minHeight: "100vh", padding: "2rem", color: "white" }}>
         <button
-          onClick={() => setSelectedPlayer(null)}
+          onClick={() => {
+            setSelectedPlayer(null)
+            setMatches([])
+          }}
           style={{
             background: "none",
             border: "1px solid #444",
@@ -42,13 +49,39 @@ export default function App() {
         <h1 style={{ fontSize: "2.5rem", fontWeight: "800" }}>
           {selectedPlayer.player_name}
         </h1>
-        <p style={{ opacity: 0.5, marginTop: "0.5rem" }}>
+        <p style={{ opacity: 0.5, marginTop: "0.5rem", marginBottom: "2rem" }}>
           {selectedPlayer.player_country}
         </p>
 
-        <p style={{ marginTop: "2rem", opacity: 0.4 }}>
-          Match history and prices coming next...
-        </p>
+        <h2 style={{ fontSize: "1rem", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "1rem" }}>
+          Recent Matches
+        </h2>
+
+        {matches.map((match, i) => (
+          <div key={i} style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "1rem",
+            padding: "0.75rem 1rem",
+            marginBottom: "0.5rem",
+            background: "#1a1f35",
+            borderRadius: "8px",
+            borderLeft: `4px solid ${match.won ? "#00c896" : "#ff4d4d"}`
+          }}>
+            <span style={{
+              fontWeight: "800",
+              color: match.won ? "#00c896" : "#ff4d4d",
+              width: "1.5rem"
+            }}>
+              {match.won ? "W" : "L"}
+            </span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: "600" }}>{match.tournament}</div>
+              <div style={{ opacity: 0.5, fontSize: "0.85rem" }}>vs {match.opponent} · {match.score}</div>
+            </div>
+            <span style={{ opacity: 0.4, fontSize: "0.8rem" }}>{match.surface}</span>
+          </div>
+        ))}
       </div>
     )
   }
@@ -62,7 +95,6 @@ export default function App() {
       justifyContent: "center",
       gap: "1rem"
     }}>
-
       <h1 style={{ fontSize: "3rem", fontWeight: "800", color: "white" }}>
         CourtPrice
       </h1>
@@ -117,7 +149,6 @@ export default function App() {
           ))}
         </ul>
       )}
-
     </div>
   )
 }

@@ -56,6 +56,39 @@ router.get("/players", (req, res) => {
     console.error(err.message)
     res.status(500).json({ error: "Failed to search players" })
   }
+
+})
+
+router.get("/matches", (req, res) => {
+  try {
+    const { playerName } = req.query
+    if (!playerName) return res.json([])
+
+    const matches = getMatches()
+    const query = playerName.toLowerCase()
+
+    const playerMatches = matches
+      .filter((m) =>
+        m.winner_name?.toLowerCase().includes(query) ||
+        m.loser_name?.toLowerCase().includes(query)
+      )
+      .map((m) => {
+        const won = m.winner_name?.toLowerCase().includes(query)
+        return {
+          tournament: m.tourney_name,
+          surface: m.surface,
+          date: m.tourney_date,
+          round: m.round,
+          score: m.score,
+          opponent: won ? m.loser_name : m.winner_name,
+          won
+        }
+      })
+
+    res.json(playerMatches)
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch matches" })
+  }
 })
 
 export default router
