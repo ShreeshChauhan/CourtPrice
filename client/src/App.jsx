@@ -141,68 +141,77 @@ export default function App() {
   }
 
   return (
-    <div style={{
-      minHeight: "100vh",
+  <div 
+    style={{
+      width: "100vw",
+      height: "100vh",
+      background: "radial-gradient(circle at center, #18181b 0%, #09090b 100%)",
       display: "flex",
       flexDirection: "column",
-      alignItems: "center",
       justifyContent: "center",
+      alignItems: "center",
+      position: "relative",
+      overflow: "hidden",
       gap: "1rem"
-    }}>
-      <h1 style={{ fontSize: "3rem", fontWeight: "800", color: "white" }}>
-        CourtPrice
-      </h1>
+    }}
+  >
+    <h1 style={{ fontSize: "3rem", fontWeight: "800", color: "white", zIndex: 10 }}>
+      CourtPrice
+    </h1>
 
+    <div style={{ zIndex: 10 }}>
       <input
         type="text"
-        placeholder="Search a player..."
+        placeholder="Search Player"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         style={{
           width: "400px",
-          padding: "0.75rem 1rem",
+          height: "48px",
+          padding: "0.75rem 1.5rem",
           fontSize: "1rem",
-          borderRadius: "8px",
-          border: "1px solid #444",
-          background: "transparent",
-          color: "white",
+          borderRadius: "9999px",
+          border: "1px solid #27272a",
+          background: "#ecf0f6",
+          color: "#09090b",
           outline: "none"
         }}
       />
-
-      {players.length > 0 && (
-        <ul style={{
-          listStyle: "none",
-          width: "400px",
-          background: "#1a1f35",
-          border: "1px solid #444",
-          borderRadius: "8px",
-          padding: "0.5rem 0"
-        }}>
-          {players.map((player) => (
-            <li
-              key={player.player_key}
-              onClick={() => {
-                setSelectedPlayer(player)
-                setQuery("")
-                setPlayers([])
-              }}
-              style={{
-                padding: "0.75rem 1rem",
-                cursor: "pointer",
-                color: "white",
-                display: "flex",
-                justifyContent: "space-between"
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.background = "#2a3050"}
-              onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
-            >
-              <span>{player.player_name}</span>
-              <span style={{ opacity: 0.5 }}>{player.player_country}</span>
-            </li>
-          ))}
-        </ul>
-      )}
     </div>
-  )
-}
+
+    {players.length > 0 && (
+      <ul style={{
+        listStyle: "none",
+        width: "400px",
+        background: "#040407",
+        border: "1px solid #0b0b0b",
+        borderRadius: "8px",
+        padding: "0.5rem 0",
+        zIndex: 10
+      }}>
+        {players.map((player) => (
+          <li
+            key={player.player_key}
+            onClick={() => {
+              setSelectedPlayer(player)
+              setQuery("")
+              setPlayers([])
+            }}
+            style={{
+              padding: "0.75rem 1rem",
+              cursor: "pointer",
+              color: "white",
+              display: "flex",
+              justifyContent: "space-between"
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = "#2a3050"}
+            onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+          >
+            <span>{player.player_name}</span>
+            <span style={{ opacity: 0.5 }}>{player.player_country}</span>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+)}
