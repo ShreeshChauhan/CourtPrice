@@ -56,7 +56,7 @@ export default function App() {
           ← Back
         </button>
 
-        <h1 style={{ fontSize: "2.5rem", fontWeight: "800" }}>
+        <h1 style={{ fontSize: "4.0rem", fontWeight: "800" }}>
           {selectedPlayer.player_name}
         </h1>
         <p style={{ opacity: 0.5, marginTop: "0.5rem", marginBottom: "2rem" }}>
@@ -83,15 +83,17 @@ export default function App() {
               color: match.won ? "#00c896" : "#ff4d4d",
               width: "1.5rem"
             }}>
-              {match.won ? "W" : "L"}
-            </span>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: "600" }}>{match.tournament}</div>
-              <div style={{ opacity: 0.5, fontSize: "0.85rem" }}>vs {match.opponent} · {match.score}</div>
-            </div>
-            <span style={{ opacity: 0.4, fontSize: "0.8rem" }}>{match.surface}</span>
-          </div>
-        ))}
+        {match.won ? "✓" : "✕"}
+    </span>
+    <div style={{ flex: 1 }}>
+      <div style={{ fontWeight: "600", fontSize: "1.125rem" }}>{match.tournament}</div>
+      {/* Replaced opacity with color: "#71717a" */}
+      <div style={{ color: "#71717a", fontSize: "0.85rem" }}>vs {match.opponent} · {match.score}</div>
+    </div>
+    {/* Replaced opacity with color: "#71717a" */}
+    <span style={{ color: "#71717a", fontSize: "0.8rem" }}>{match.surface}</span>
+  </div>
+))}
 
         <h2 style={{ fontSize: "1rem", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.1em", margin: "2rem 0 1rem" }}>
   Memorabilia Prices
