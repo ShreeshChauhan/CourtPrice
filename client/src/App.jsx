@@ -5,6 +5,7 @@ export default function App() {
   const [players, setPlayers] = useState([])
   const [selectedPlayer, setSelectedPlayer] = useState(null)
   const [matches, setMatches] = useState([])
+  const [priceData, setPriceData] = useState(null)
 
   useEffect(() => {
     if (query.length < 3) {
@@ -25,6 +26,14 @@ export default function App() {
       .catch((err) => console.error(err))
   }, [selectedPlayer])
 
+  useEffect(() => {
+  if (!selectedPlayer) return
+  fetch(`http://localhost:3001/api/ebay/prices?player=${selectedPlayer.player_name}`)
+    .then((res) => res.json())
+    .then((data) => setPriceData(data))
+    .catch((err) => console.error(err))
+}, [selectedPlayer])
+
   if (selectedPlayer) {
     return (
       <div style={{ minHeight: "100vh", padding: "2rem", color: "white" }}>
@@ -32,6 +41,7 @@ export default function App() {
           onClick={() => {
             setSelectedPlayer(null)
             setMatches([])
+            setPriceData(null)
           }}
           style={{
             background: "none",
@@ -82,6 +92,50 @@ export default function App() {
             <span style={{ opacity: 0.4, fontSize: "0.8rem" }}>{match.surface}</span>
           </div>
         ))}
+
+        <h2 style={{ fontSize: "1rem", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.1em", margin: "2rem 0 1rem" }}>
+  Memorabilia Prices
+</h2>
+
+{priceData && (
+  <>
+    <div style={{ display: "flex", gap: "1rem", marginBottom: "1.5rem" }}>
+      {[
+        { label: "Avg Price", value: `$${priceData.average}` },
+        { label: "Min", value: `$${priceData.min}` },
+        { label: "Max", value: `$${priceData.max}` },
+        { label: "Listings", value: priceData.count },
+      ].map((stat) => (
+        <div key={stat.label} style={{
+          flex: 1,
+          background: "#1a1f35",
+          border: "1px solid #2a3050",
+          borderRadius: "8px",
+          padding: "1rem",
+          textAlign: "center"
+        }}>
+          <div style={{ opacity: 0.4, fontSize: "0.75rem", marginBottom: "0.25rem" }}>{stat.label}</div>
+          <div style={{ fontSize: "1.25rem", fontWeight: "700", color: "#00c896" }}>{stat.value}</div>
+        </div>
+      ))}
+    </div>
+
+    {priceData.items.map((item, i) => (
+      <div key={i} style={{
+        padding: "0.75rem 1rem",
+        marginBottom: "0.5rem",
+        background: "#1a1f35",
+        borderRadius: "8px",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center"
+      }}>
+        <span style={{ fontSize: "0.9rem" }}>{item.title}</span>
+        <span style={{ color: "#00c896", fontWeight: "700" }}>${item.price}</span>
+      </div>
+    ))}
+  </>
+)}
       </div>
     )
   }
