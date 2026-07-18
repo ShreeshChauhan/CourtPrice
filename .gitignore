@@ -1,0 +1,14 @@
+# Environment variables - never push these
+server/.env
+
+# Node modules - too large to push
+node_modules/
+server/node_modules/
+client/node_modules/
+
+# Build output
+client/dist/
+
+# OS files
+.DS_Store
+Thumbs.db

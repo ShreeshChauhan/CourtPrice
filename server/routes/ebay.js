@@ -1,59 +1,73 @@
 import express from "express"
+import axios from "axios"
 
 const router = express.Router()
 
-// Mock data for now — replace with real eBay API call when keys arrive
-const mockPrices = {
-  "carlos alcaraz": {
-    average: "245.00",
-    min: "120.00",
-    max: "890.00",
-    count: 18,
-    items: [
-      { title: "Carlos Alcaraz Signed Tennis Racket", price: "450.00", currency: "USD", url: "#", image: null },
-      { title: "Alcaraz Signed Wimbledon Photo", price: "220.00", currency: "USD", url: "#", image: null },
-      { title: "Carlos Alcaraz Autographed Shirt", price: "189.00", currency: "USD", url: "#", image: null },
-    ]
-  },
-  "novak djokovic": {
-    average: "380.00",
-    min: "150.00",
-    max: "1200.00",
-    count: 32,
-    items: [
-      { title: "Djokovic Signed Tennis Racket", price: "750.00", currency: "USD", url: "#", image: null },
-      { title: "Novak Djokovic Autographed Photo", price: "310.00", currency: "USD", url: "#", image: null },
-      { title: "Djokovic Signed Shirt Wimbledon", price: "280.00", currency: "USD", url: "#", image: null },
-    ]
-  },
-  "jannik sinner": {
-    average: "198.00",
-    min: "95.00",
-    max: "650.00",
-    count: 12,
-    items: [
-      { title: "Jannik Sinner Signed Photo", price: "195.00", currency: "USD", url: "#", image: null },
-      { title: "Sinner Autographed Tennis Ball", price: "120.00", currency: "USD", url: "#", image: null },
-    ]
-  }
+async function getEbayToken() {
+  const credentials = Buffer.from(
+    `${process.env.EBAY_CLIENT_ID}:${process.env.EBAY_CLIENT_SECRET}`
+  ).toString("base64")
+
+  const response = await axios.post(
+    "https://api.ebay.com/identity/v1/oauth2/token",
+    "grant_type=client_credentials&scope=https://api.ebay.com/oauth/api_scope",
+    {
+      headers: {
+        Authorization: `Basic ${credentials}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    }
+  )
+  return response.data.access_token
 }
 
-router.get("/prices", (req, res) => {
-  const { player } = req.query
-  if (!player) return res.json(null)
+router.get("/prices", async (req, res) => {
+  try {
+    const { player } = req.query
+    if (!player) return res.json(null)
 
-  const key = player.toLowerCase()
-  const data = mockPrices[key] || {
-    average: "150.00",
-    min: "50.00",
-    max: "400.00",
-    count: 5,
-    items: [
-      { title: `${player} Signed Photo`, price: "150.00", currency: "USD", url: "#", image: null }
-    ]
+    const token = await getEbayToken()
+
+    const response = await axios.get(
+      "https://api.ebay.com/buy/browse/v1/item_summary/search",
+      {
+        params: {
+          q: `${player} signed tennis`,
+          filter: "buyingOptions:{FIXED_PRICE}",
+          limit: 20,
+        },
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    )
+
+    const items = response.data.itemSummaries || []
+    const prices = items
+      .map((i) => parseFloat(i.price?.value))
+      .filter(Boolean)
+
+    if (prices.length === 0) return res.json(null)
+
+    const avg = (prices.reduce((a, b) => a + b, 0) / prices.length).toFixed(2)
+    const min = Math.min(...prices).toFixed(2)
+    const max = Math.max(...prices).toFixed(2)
+
+    res.json({
+      average: avg,
+      min,
+      max,
+      count: prices.length,
+      items: items.slice(0, 5).map((i) => ({
+        title: i.title,
+        price: i.price?.value,
+        currency: i.price?.currency,
+        url: i.itemWebUrl,
+        image: i.image?.imageUrl,
+      })),
+    })
+  } catch (err) {
+    console.error(err.message)
+    res.status(500).json({ error: "Failed to fetch eBay prices" })
   }
-
-  res.json(data)
 })
 
 export default router
