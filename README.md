@@ -2,17 +2,16 @@
 
 > A full-stack web app that tracks ATP tennis player performance and correlates it with real-world memorabilia prices on eBay.
 
-Search any player, see their recent match history, and view what their signed merchandise is selling for — with price trends over time.
+Search any player, see their recent match history, and view what their signed merchandise is selling for right now.
 
 ---
 
 ## What It Does
 
-- Search any ATP player (Alcaraz, Sinner, Djokovic...)
-- View their last 15 matches with results, opponents, scores, and tournaments
-- See live eBay prices for their signed memorabilia (avg, min, max)
-- Track price history over time as a chart
-- Browse active listings with images and direct eBay links
+- Search any ATP player (Alcaraz, Sinner, Djokovic, Medvedev...)
+- Click a player to see their recent match history — wins, losses, scores, surfaces, tournaments
+- See live eBay prices for their signed memorabilia (avg, min, max, total listings)
+- Browse active eBay listings with titles and prices
 
 ---
 
@@ -20,14 +19,10 @@ Search any player, see their recent match history, and view what their signed me
 
 | Layer | Technology | Purpose |
 |---|---|---|
-| Frontend | React + Vite | UI — search, player cards, charts |
-| Backend | Node.js + Express | REST API server, middleware |
-| Tennis Data | JeffSackmann CSV (GitHub) | Free ATP match dataset (2023–2024) |
+| Frontend | React + Vite | Search UI, player profile, match history, price display |
+| Backend | Node.js + Express | REST API server, routing, middleware |
+| Tennis Data | Local CSV (ATP match data) | Player search and match history |
 | Merchandise | eBay Browse API | Live signed memorabilia prices |
-| Cloud Storage | AWS S3 | Caches tennis CSVs (avoids re-fetching) |
-| Database | AWS DynamoDB | Stores daily price snapshots per player |
-| Server | AWS EC2 | Hosts Express backend 24/7 |
-| Frontend Deploy | Vercel | Hosts React app, connects to EC2 |
 
 ---
 
@@ -36,12 +31,12 @@ Search any player, see their recent match history, and view what their signed me
 ```
 User's Browser
       ↓
-  React App (Vercel)
+  React App (localhost:5173)
       ↓  HTTP requests
-  Express Server (AWS EC2)
-      ↓              ↓              ↓
-  eBay API     GitHub CSVs      DynamoDB
-               (cached in S3)  (price history)
+  Express Server (localhost:3001)
+      ↓                    ↓
+  eBay Browse API     Local CSV Data
+  (live prices)       (match history)
 ```
 
 ---
@@ -52,24 +47,14 @@ User's Browser
 courtprice/
 ├── client/                   # React frontend
 │   └── src/
-│       ├── components/
-│       │   ├── MatchHistory.jsx        # Win/loss match list
-│       │   ├── PriceChart.jsx          # Active eBay listings
-│       │   └── PriceHistoryChart.jsx   # SVG price trend over time
-│       ├── hooks/
-│       │   ├── useTennisData.js        # Player search, matches, rankings
-│       │   └── useEbayPrices.js        # Live eBay price fetching
-│       └── pages/
-│           ├── Home.jsx                # Rankings + search
-│           └── PlayerDetail.jsx        # Player profile page
+│       └── App.jsx           # Main app — search, player detail, prices
 │
 └── server/                   # Express backend
-    ├── aws/
-    │   ├── s3.js             # S3 read/write helpers
-    │   └── dynamo.js         # DynamoDB save/query helpers
+    ├── data/
+    │   └── atp_matches.csv   # ATP match data
     ├── routes/
-    │   ├── tennis.js         # /api/tennis/* — players, matches, rankings
-    │   └── ebay.js           # /api/ebay/* — prices, history
+    │   ├── tennis.js         # /api/tennis/* — players, matches
+    │   └── ebay.js           # /api/ebay/* — live prices
     └── index.js              # Server entry point
 ```
 
@@ -79,8 +64,7 @@ courtprice/
 
 ### Prerequisites
 - Node.js v18+
-- An eBay Developer account (free at [developer.ebay.com](https://developer.ebay.com))
-- AWS account (free tier at [aws.amazon.com](https://aws.amazon.com)) — optional for local dev
+- eBay Developer account — free at [developer.ebay.com](https://developer.ebay.com)
 
 ### 1. Clone the repo
 ```bash
@@ -92,8 +76,17 @@ cd courtprice
 ```bash
 cd server
 npm install
-cp .env.example .env
-# Fill in your keys in .env
+```
+
+Create a `.env` file inside `server/`:
+```env
+PORT=3001
+EBAY_CLIENT_ID=your_client_id
+EBAY_CLIENT_SECRET=your_client_secret
+```
+
+Then run:
+```bash
 npm run dev
 ```
 
@@ -108,85 +101,39 @@ App runs at `http://localhost:5173`
 
 ---
 
-## Environment Variables
-
-Create `server/.env` based on `.env.example`:
-
-```env
-PORT=3001
-
-# eBay API — free at developer.ebay.com
-EBAY_CLIENT_ID=your_client_id
-EBAY_CLIENT_SECRET=your_client_secret
-
-# AWS — optional locally, required on EC2
-AWS_REGION=us-east-1
-AWS_ACCESS_KEY_ID=your_access_key
-AWS_SECRET_ACCESS_KEY=your_secret_key
-S3_BUCKET_NAME=courtprice-csv-cache
-DYNAMO_TABLE=courtprice-prices
-```
-
-> AWS keys are optional for local development. The app falls back to in-memory caching automatically.
-
----
-
 ## API Endpoints
 
 ### Tennis
 | Method | Endpoint | Description |
 |---|---|---|
 | GET | `/api/tennis/players?name=alcaraz` | Search players by name |
-| GET | `/api/tennis/matches?playerName=Carlos+Alcaraz` | Last 15 matches |
-| GET | `/api/tennis/rankings` | ATP Top 20 |
+| GET | `/api/tennis/matches?playerName=Carlos+Alcaraz` | Recent match history |
 
 ### eBay
 | Method | Endpoint | Description |
 |---|---|---|
 | GET | `/api/ebay/prices?player=Carlos+Alcaraz` | Live price stats + listings |
-| GET | `/api/ebay/history?player=Carlos+Alcaraz` | Price history from DynamoDB |
 
 ---
 
-## AWS Setup (for deployment)
+## Features Breakdown
 
-See [AWS_DEPLOY.md](./AWS_DEPLOY.md) for the full step-by-step guide to:
-- Creating an S3 bucket for CSV caching
-- Creating a DynamoDB table for price history
-- Launching an EC2 instance and deploying the server
-- Connecting Vercel frontend to EC2 backend
+**Search Page**
+- Radial gradient dark background
+- Centered search bar with pill shape
+- Quick-search tags: Alcaraz, Sinner, Djokovic, Medvedev
+- Live dropdown as you type (triggers after 3 characters)
+- Nav bar with tech stack badges + GitHub link
 
----
-
-## Deploying
-
-### Backend → AWS EC2
-```bash
-# SSH into your EC2 instance
-ssh -i your-key.pem ubuntu@YOUR_EC2_IP
-
-# Upload server code
-scp -i your-key.pem -r ./server ubuntu@YOUR_EC2_IP:~/
-
-# On EC2
-cd server && npm install
-npm install -g pm2
-pm2 start index.js --name courtprice
-pm2 startup
-```
-
-### Frontend → Vercel
-1. Push `client/` to GitHub
-2. Import project at [vercel.com](https://vercel.com)
-3. Set env variable: `VITE_API_URL=http://YOUR_EC2_IP:3001`
-4. Deploy
+**Player Profile Page**
+- Avatar with player initials
+- Metadata chips (country, handedness)
+- 2-column grid layout — matches left, prices right
+- Win/Loss capsule badges (green/red)
+- eBay stat cards (avg, min, max, listings)
+- Listing rows with thumbnail placeholder and price
 
 ---
-
-## Data Sources
-
-- **Tennis match data:** [JeffSackmann/tennis_atp](https://github.com/JeffSackmann/tennis_atp) — free, no API key required, updated regularly
-- **Merchandise prices:** [eBay Browse API](https://developer.ebay.com/api-docs/buy/browse/overview.html) — free developer tier, OAuth2 app credentials
 
 
 ---
